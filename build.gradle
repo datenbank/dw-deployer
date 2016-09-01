@@ -1,0 +1,70 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+mainClassName = "datenbank.deployer.Main"
+
+version = '1.0.0'
+
+repositories {
+   mavenCentral()
+}
+
+
+dependencies {
+	compile 'org.codehaus.groovy:groovy-all:2.4.7'
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.2'
+	compile group: 'log4j', name: 'log4j', version: '1.2.17'
+	compile 'net.sourceforge.jtds:jtds:1.3.1'	
+	compile group: 'org.apache.commons', name: 'commons-csv', version: '1.1'
+	
+	testCompile 'junit:junit:4.12'
+	
+	new File('libs').eachFile() {
+ 		compile files("$it")
+ 	}	
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.00'
+}
+
+run {	
+	try { 
+		args System.getProperty("exec.args").split()
+	} catch(all) {}
+}
+
+sourceSets.main.resources { srcDirs = ["src/main/resources"]; exclude "**/*.groovy" }
+
+distZip {
+
+	into(project.name+'-'+project.version+'') {
+		from '.'
+		include 'LICENSE'
+	}
+
+	into(project.name+'-'+project.version+'/bin') {
+		from '.'
+		include 'dw-deployer.config'
+
+		
+	}
+}
+
+
+installDist {
+	into('') {
+		from '.'
+		include 'LICENSE'
+	}
+
+	
+	into('bin') {
+		from '.'
+		include 'dw-deployer.config'
+		
+	}
+
+}

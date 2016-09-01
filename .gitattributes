@@ -1,0 +1,6 @@
+* text=auto
+
+*.groovy  eol=crlf
+*.bat     eol=crlf
+*.csv     eol=crlf
+*.sql     eol=crlf

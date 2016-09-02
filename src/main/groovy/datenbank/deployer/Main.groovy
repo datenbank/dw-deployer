@@ -42,7 +42,7 @@ class Main {
 		cli.a(longOpt: 'asdatabase', 'deploy a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
 		cli.ap(longOpt: 'asprepare', 'prepare a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
 		cli.x(longOpt: 'xmla', 'make an xmla file from a .asdatabase file, example; <file>.asdatabase,<outfile>.xmla', required: false, args: 2, valueSeparator: ',')
-		cli.xd(longOpt: 'xmladeploy', 'deploy an xmla file', required: false, args: 1)
+		cli.xd(longOpt: 'xmladeploy', 'deploy an xmla file throught PowerShell script example; <file>.xmla,<file>.ps1', required: false, args: 2,  valueSeparator: ',')
 		cli.s(longOpt: 'server', 'server to deploy to', required: false)
 		cli.db(longOpt: 'database', 'database to deploy to (for .dacpac files)', required: false)
 		cli.v(longOpt: 'variables', 'variables when deloying example; Varable1Name=Value,Varable2Name=Value2', required: false, args: Option.UNLIMITED_VALUES, valueSeparator: ',')
@@ -168,11 +168,11 @@ class Main {
 		}
 		
 		if(opt.xd) {
-			def deployAsDatabaseXmlaDeploy = new AsDatabaseDeployer(server: server, xmla: opt.xd)
-			
+			def deployAsDatabaseXmlaDeploy = new AsDatabaseDeployer(server: server, xmla: opt.xds[0], ps1: opt.xds[1])			
 			deployAsDatabaseXmlaDeploy.addObserver(cp)
-			if(opt.p) {
-				deployAsDatabaseXmlaDeploy.setupCommandDeployPowershell()
+			if(opt.p) {				
+				deployAsDatabaseXmlaDeploy.createPowershellScript()
+				deployAsDatabaseXmlaDeploy.setupCommandDeployPowershell()				
 			} else {
 				deployAsDatabaseXmlaDeploy.deployXmla()
 			}

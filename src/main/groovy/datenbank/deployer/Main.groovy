@@ -23,9 +23,67 @@ class Main {
 		
 		config = new ConfigSlurper(environment).parse(new File('dw-deployer.config').text) 
 		
+		def pathString = "set PATH=%PATH%;"
+		def devenvPath = config.devenv.split('\\\\')
+		def z = 1
+		devenvPath.each {
+			if(devenvPath.size() > z) {
+				pathString <<= "${it}\\"
+			} else {
+				pathString <<= ";"
+			}
+			z++
+		}
+		
+		def SqlPackagePath = config.SqlPackage.split('\\\\')
+		z = 1
+		SqlPackagePath.each {
+			if(SqlPackagePath.size() > z) {
+				pathString <<= "${it}\\"
+			} else {
+				pathString <<= ";"
+			}
+			z++
+		}
+		
+		def ISDeployPath = config.ISDeploy.split('\\\\')
+		z = 1
+		ISDeployPath.each {
+			if(ISDeployPath.size() > z) {
+				pathString <<= "${it}\\"
+			} else {
+				pathString <<= ";"
+			}
+			z++
+		}
+		
+		def ASDeployPath = config.ASDeploy.split('\\\\')
+		z = 1
+		ASDeployPath.each {
+			if(ASDeployPath.size() > z) {
+				pathString <<= "${it}\\"
+			} else {
+				pathString <<= ";"
+			}
+			z++
+		}
+		
+		def sqlcmdPath = config.sqlcmd.split('\\\\')
+		z = 1
+		sqlcmdPath.each {
+			if(sqlcmdPath.size() > z) {
+				pathString <<= "${it}\\"
+			} else {
+				pathString <<= ";"
+			}
+			z++
+		}
+		
+		println "$pathString"
+		
 		def path = new File('path.bat')
 		path.write("")
-		path << "set PATH=%PATH%;${config.path}"
+		path << "$pathString"
 		
 		if(path.exists()) {
 			def res = "path.bat".execute()

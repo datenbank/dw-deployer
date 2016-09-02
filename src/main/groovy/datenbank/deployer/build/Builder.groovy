@@ -4,7 +4,7 @@ import java.util.Observable
 
 class Builder extends Observable {
 	
-	def devenv = "devenv"	
+	def devenv = "devenv.com"	
 	def slnOrProj
 	
 	def cmd

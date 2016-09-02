@@ -23,7 +23,11 @@ class Main {
 		
 		config = new ConfigSlurper(environment).parse(new File('dw-deployer.config').text) 
 		
-		if(new File('path.bat').exists()) {
+		def path = new File('path.bat')
+		path.write("")
+		path << "set PATH=%PATH%;${config.path}"
+		
+		if(path.exists()) {
 			def res = "path.bat".execute()
 			res.waitFor()
 		} else {
@@ -36,12 +40,14 @@ class Main {
 		cli.d(longOpt: 'dacpac', 'deploy a .dacpac file', required: false, args: 1)
 		cli.i(longOpt: 'ispac', 'deploy a .ispac file, example; <file>.ispac,/SSISDB/<folder>/<project>', required: false, args: 2, valueSeparator: ',')
 		cli.a(longOpt: 'asdatabase', 'prepare a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
+		cli.ap(longOpt: 'asprepare', 'prepare a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
 		cli.x(longOpt: 'xmla', 'make an xmla file from a .asdatabase file, example; <file>.asdatabase,<outfile>.xmla', required: false, args: 2, valueSeparator: ',')
 		cli.s(longOpt: 'server', 'server to deploy to', required: false)
 		cli.db(longOpt: 'database', 'database to deploy to (for .dacpac files)', required: false)
 		cli.v(longOpt: 'variables', 'variables when deloying example; Varable1Name=Value,Varable2Name=Value2', required: false, args: Option.UNLIMITED_VALUES, valueSeparator: ',')
 		cli.f(longOpt: 'files', 'list files example; <path>,<extension>', required: false, args: 2, valueSeparator: ',')
 		cli.p(longOpt: 'print', 'only print commands', required: false)
+		cli.sql(longOpt: 'sequel', 'deploy a .sql file', required: false, , args: 1)
 		OptionAccessor opt = cli.parse(args)
 		
 		def i = 0
@@ -121,14 +127,27 @@ class Main {
 			i++
 		}
 		
+		if(opt.ap) {
+			def deployAsDatabasePrepare = new AsDatabaseDeployer(asdatabase: opt.ap)
+			
+			deployAsDatabasePrepare.addObserver(cp)
+			if(opt.p) {
+				deployAsDatabasePrepare.setupCommandPrepare()
+			} else {
+				deployAsDatabasePrepare.prepare()
+			}
+			deployAsDatabasePrepare.ready()
+			i++
+		}
+		
 		if(opt.a) {
 			def deployAsDatabase = new AsDatabaseDeployer(asdatabase: opt.a)
 			
 			deployAsDatabase.addObserver(cp)
 			if(opt.p) {
-				deployAsDatabase.setupCommandPrepare()
+				deployAsDatabase.setupCommandDeploy()
 			} else {
-				deployAsDatabase.prepare()
+				deployAsDatabase.deploy()
 			}
 			deployAsDatabase.ready()
 			i++
@@ -144,6 +163,19 @@ class Main {
 				deployAsDatabaseXmla.xmla()
 			}
 			deployAsDatabaseXmla.ready()
+			i++
+		}
+		
+		if(opt.sql) {
+			def deploySql = new SqlDeployer(sql: opt.sql, server: server)
+		
+			deploySql.addObserver(cp)
+			if(opt.p) {
+				deploySql.setupCommand()
+			} else {
+				deploySql.deploy()
+			}
+			deploySql.ready()
 			i++
 		}
 		

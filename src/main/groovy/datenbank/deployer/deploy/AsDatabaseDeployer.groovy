@@ -25,6 +25,12 @@ class AsDatabaseDeployer extends Observable {
 		
 	}
 	
+	def setupCommandDeploy() {
+		
+		cmd = "${ASDeploymentWizard} ${asdatabase}"
+		
+	}
+	
 	def prepare() {
 		setupCommandPrepare()
 		
@@ -45,6 +51,15 @@ class AsDatabaseDeployer extends Observable {
 		error = res.err.text
 	}
 	
+	def deploy() {
+		setupCommandDeploy()
+		
+		def res = cmd.execute()
+		res.waitFor()
+					
+		output = res.in.text
+		error = res.err.text
+	}
 	
 	def ready() {
 		setChanged()

@@ -4,7 +4,7 @@ import java.util.Observable;
 
 class IspacDeployer extends Observable {
 	
-	def ISDeploymentWizard = "ISDeploymentWizard"
+	def ISDeploymentWizard = "ISDeploymentWizard.exe"
 	def ispac 
 	def server
 	def destinationPath

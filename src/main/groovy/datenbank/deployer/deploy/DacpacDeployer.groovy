@@ -4,7 +4,7 @@ import java.util.Observable;
 
 class DacpacDeployer extends Observable {
 	
-	def SqlPackage = "SqlPackage"
+	def SqlPackage = "SqlPackage.exe"
 	def dacpac 
 	def server
 	def databaseName

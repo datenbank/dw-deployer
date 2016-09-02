@@ -39,9 +39,10 @@ class Main {
 		cli.b(longOpt: 'build', 'build a .sln or .proj file', required: false, args: 1)
 		cli.d(longOpt: 'dacpac', 'deploy a .dacpac file', required: false, args: 1)
 		cli.i(longOpt: 'ispac', 'deploy a .ispac file, example; <file>.ispac,/SSISDB/<folder>/<project>', required: false, args: 2, valueSeparator: ',')
-		cli.a(longOpt: 'asdatabase', 'prepare a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
+		cli.a(longOpt: 'asdatabase', 'deploy a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
 		cli.ap(longOpt: 'asprepare', 'prepare a .asdatabase file, example; <file>.asdatabase', required: false, args: 1)
 		cli.x(longOpt: 'xmla', 'make an xmla file from a .asdatabase file, example; <file>.asdatabase,<outfile>.xmla', required: false, args: 2, valueSeparator: ',')
+		cli.xd(longOpt: 'xmladeploy', 'deploy an xmla file', required: false, args: 1)
 		cli.s(longOpt: 'server', 'server to deploy to', required: false)
 		cli.db(longOpt: 'database', 'database to deploy to (for .dacpac files)', required: false)
 		cli.v(longOpt: 'variables', 'variables when deloying example; Varable1Name=Value,Varable2Name=Value2', required: false, args: Option.UNLIMITED_VALUES, valueSeparator: ',')
@@ -163,6 +164,19 @@ class Main {
 				deployAsDatabaseXmla.xmla()
 			}
 			deployAsDatabaseXmla.ready()
+			i++
+		}
+		
+		if(opt.xd) {
+			def deployAsDatabaseXmlaDeploy = new AsDatabaseDeployer(server: server, xmla: opt.xd)
+			
+			deployAsDatabaseXmlaDeploy.addObserver(cp)
+			if(opt.p) {
+				deployAsDatabaseXmlaDeploy.setupCommandDeployPowershell()
+			} else {
+				deployAsDatabaseXmlaDeploy.deployXmla()
+			}
+			deployAsDatabaseXmlaDeploy.ready()
 			i++
 		}
 		

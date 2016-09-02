@@ -9,6 +9,8 @@ class AsDatabaseDeployer extends Observable {
 	def xmla	
 	def params = []
 	
+	def server
+	
 	def cmd
 	def output
 	def error
@@ -30,6 +32,23 @@ class AsDatabaseDeployer extends Observable {
 		cmd = "${ASDeploymentWizard} ${asdatabase}"
 		
 	}
+	
+	def setupCommandDeployPowershell() {
+		
+		cmd = "powershell -file xmlscript.ps1"
+		
+	}
+	
+	def createPowershellScript() {
+		
+		def ps1 = new File('xmlscript.ps1')
+		ps1.write('')
+		
+		ps1 << "Import-Module SQLPS\r\n"
+		ps1 << "Invoke-ASCmd -Server ${server} -InputFile ${xmla}\r\n"
+		ps1 << "exit\r\n"
+	}
+	
 	
 	def prepare() {
 		setupCommandPrepare()
@@ -53,6 +72,19 @@ class AsDatabaseDeployer extends Observable {
 	
 	def deploy() {
 		setupCommandDeploy()
+		
+		def res = cmd.execute()
+		res.waitFor()
+					
+		output = res.in.text
+		error = res.err.text
+	}
+	
+	
+	
+	def deployXmla() {
+		createPowershellScript()
+		setupCommandDeployPowershell()
 		
 		def res = cmd.execute()
 		res.waitFor()

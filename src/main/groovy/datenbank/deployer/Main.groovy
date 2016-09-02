@@ -47,8 +47,10 @@ class Main {
 		cli.db(longOpt: 'database', 'database to deploy to (for .dacpac files)', required: false)
 		cli.v(longOpt: 'variables', 'variables when deloying example; Varable1Name=Value,Varable2Name=Value2', required: false, args: Option.UNLIMITED_VALUES, valueSeparator: ',')
 		cli.f(longOpt: 'files', 'list files example; <path>,<extension>', required: false, args: 2, valueSeparator: ',')
+		cli.fa(longOpt: 'filesall', 'list files example; <path>', required: false, args: 1)
 		cli.p(longOpt: 'print', 'only print commands', required: false)
 		cli.sql(longOpt: 'sequel', 'deploy a .sql file', required: false, , args: 1)
+		cli.auto(longOpt: 'auto', 'automate it all', required: false, , args: 1)
 		OptionAccessor opt = cli.parse(args)
 		
 		def i = 0
@@ -74,6 +76,79 @@ class Main {
 			files.addObserver(cp)
 			files.search()
 			files.ready()
+			i++
+		}
+		
+		if(opt.fa) {
+			
+			def files = new FileLister(startPath: opt.fa, extension:'.sln')
+			files.addObserver(cp)
+			files.search()
+			files.ready()
+			
+			files = new FileLister(startPath: opt.fa, extension:'.dacpac')
+			files.addObserver(cp)
+			files.search()
+			files.ready()
+			
+			files = new FileLister(startPath: opt.fa, extension:'.ispac')
+			files.addObserver(cp)
+			files.search()
+			files.ready()
+			
+			files = new FileLister(startPath: opt.fa, extension:'.asdatabase')
+			files.addObserver(cp)
+			files.search()
+			files.ready()
+			
+			i++
+		}
+		
+		if(opt.auto) {
+			
+			def files = new FileLister(startPath: opt.auto, extension:'.sln')
+			files.search()
+			
+			files.files.each {
+				def build = new Builder(slnOrProj: it)
+				build.setupCommand()
+				build.addObserver(cp)
+				build.ready()
+			}
+			
+			
+			
+			files = new FileLister(startPath: opt.auto, extension:'.dacpac')			
+			files.search()
+			files.files.each {
+				def deploy = new DacpacDeployer(dacpac: it, server: server, databaseName: it.name.replace('.dacpac', ''))
+				deploy.setupCommand()
+				deploy.addObserver(cp)
+				deploy.ready()
+			}
+			
+			files = new FileLister(startPath: opt.auto, extension:'.ispac')
+			files.search()
+			files.files.each {
+				def deployIspac = new IspacDeployer(ispac: it, server: server, destinationPath: '/SSISDB/<Folder>/'+it.name.replace('.ispac', ''))
+				deployIspac.setupCommand()				
+				deployIspac.addObserver(cp)
+				deployIspac.ready()
+				
+			}
+			
+			
+			files = new FileLister(startPath: opt.auto, extension:'.asdatabase')
+			files.search()
+			files.files.each {
+				def deployAsDatabase = new AsDatabaseDeployer(asdatabase: it)
+				deployAsDatabase.setupCommandDeploy()
+				deployAsDatabase.addObserver(cp)
+				deployAsDatabase.ready()
+				
+			}
+
+			
 			i++
 		}
 		
